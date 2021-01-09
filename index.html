@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tic Tac Toe Game</title>
+  </head>
+  <body>
+    <div class="gameOver" data-active="false">
+      <h1>Game Over</h1>
+      <h1>It's a Draw!</h1>
+      <button>Play Again!</button>
+    </div>
+    <p id="nowPlayer">X's Turn</p>
+    <div class="grid"></div>
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@900&display=swap");
+      html,
+      body {
+        height: calc(100% - 10px);
+      }
+
+      body {
+        font-family: "Roboto", sans-serif;
+        margin: 0;
+        padding: 0 5px 0 5px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 23px;
+        letter-spacing: 3px;
+        font-weight: bold;
+        color: white;
+        background: #000000;
+      }
+
+      button {
+        font-family: "Roboto", sans-serif;
+        font-weight: bold;
+        border-radius: 7px;
+        color: black;
+        background: #ff0000;
+      }
+
+      .gameOver {
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-evenly;
+        background: black;
+        transition: opacity 700ms ease-in, z-index 800ms ease-out;
+      }
+
+      .gameOver[data-active="false"] {
+        opacity: 0;
+        z-index: -1;
+      }
+
+      .gameOver[data-active="true"] {
+        opacity: 1;
+        z-index: 100;
+      }
+
+      .gameOver button {
+        width: 60vw;
+        height: 40px;
+        font-size: 30px;
+      }
+
+      .grid {
+        display: grid;
+        flex: 1;
+        align-self: stretch;
+        grid-gap: 5px;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+      }
+
+      .grid button {
+        font-size: 2.5em;
+      }
+    </style>
+
+    <script>
+      window.onload = startGame;
+
+      function select(...cell) {
+        let selected = [];
+        cell.forEach((i) => selected.push(cells[i]));
+        return selected;
+      }
+
+      function startGame() {
+        window.currentPlayer = "X";
+        window.markedBox = 0;
+        window.nowPlaying = document.querySelector("#nowPlayer");
+        window.gameOver = document.querySelector(".gameOver");
+        window.cells = [];
+        document
+          .querySelector(".gameOver button")
+          .addEventListener("click", () => playAgain());
+        createUI();
+      }
+
+      function createUI() {
+        let grid = document.querySelector(".grid");
+        for (let i = 0; i < 9; i++) {
+          let cell = document.createElement("button");
+          cell.addEventListener("click", () => boxClicked(cell));
+          grid.appendChild(cell);
+          cells.push(cell);
+        }
+      }
+
+      function boxClicked(cell) {
+        cell.innerText = currentPlayer;
+        cell.disabled = true;
+        markedBox++;
+        lastMove();
+      }
+
+      function lastMove() {
+        if (board()) {
+          whenGameOver(true);
+        } else if (markedBox > 8) {
+          whenGameOver(false);
+        } else {
+          currentPlayer = currentPlayer === "X" ? "O" : "X";
+          nowPlaying.innerText = `${currentPlayer}'s Turn`;
+        }
+      }
+
+      function board() {
+        let checks = [checkHorizontal(), checkVertical(), checkDiagonal()];
+        return checks.some((b) => b);
+      }
+
+      function checkLine(line) {
+        return line.every((c) => c.innerText === currentPlayer);
+      }
+
+      function checkHorizontal() {
+        let horizontal = [select(0, 1, 2), select(3, 4, 5), select(6, 7, 8)];
+        return horizontal.some((h) => checkLine(h));
+      }
+
+      function checkVertical() {
+        let vertical = [select(0, 3, 6), select(1, 4, 7), select(2, 5, 8)];
+        return vertical.some((v) => checkLine(v));
+      }
+
+      function checkDiagonal() {
+        let diagonal = [select(0, 4, 8), select(2, 4, 6)];
+        return diagonal.some((d) => checkLine(d));
+      }
+
+      function whenGameOver(winner) {
+        let info = "Draw! Do you want to play again?";
+        if (winner) {
+          info = `${currentPlayer} Wins!`;
+        }
+        gameOver.querySelector(":nth-child(2)").innerText = info;
+        setTimeout(() => gameOver.setAttribute("data-active", "true"), 500);
+      }
+
+      function playAgain() {
+        currentPlayer = "X";
+        markedBox = 0;
+        cells.forEach((c) => {
+          c.innerText = "";
+          c.disabled = false;
+        });
+
+        gameOver.setAttribute("data-active", "false");
+      }
+    </script>
+  </body>
+</html>
